@@ -18,25 +18,26 @@ def extract_INF_video(file_name):
     #add a column into the dataframe containing the video id
     df["video_id"]=video_id
     #create a list of name 
-    name=[df["Politician"][i] if df["Influencer/tiktoker"][i] is np.nan else df["Influencer/tiktoker"][i] for i in range(len(df))]       
+    name=[df["Politician"][i] if df["Influencer/tiktoker"][i] is np.nan else df["Influencer/tiktoker"][i] for i in range(len(df))] 
+    name=[name[i].replace(" ", "_") for i in range(len(name))]
     return df,video_id,name
 
 
-def download_video(cos_key,video_id,name,data_time):
+def download_video(cos_key,video_id,name):
     #extract the video bytes using the tiktokapi library
     with TikTokApi(custom_verify_fp=cos_key) as api:
         video = api.video(id=video_id)
-        video_data = video.bytes()
+        video_data = video.bytes()        
+        #create a specific directory and name for the video 
+        file_name="Audio/{}_vid_{}.mp4".format(name,video_id)
+        os.makedirs(os.path.dirname(file_name), exist_ok=True)
+        #save the video into an mp4 file
+        with open(file_name, "wb") as out_file:
+            out_file.write(video_data)
         api.shutdown()
-    #create a specific directory and name for the video 
-    file_name="{}/{}_{}.mp4".format(name,data_time,video_id[-3:])
-    os.makedirs(os.path.dirname(file_name), exist_ok=True)
-    #save the video into an mp4 file
-    with open(file_name, "wb") as out_file:
-        out_file.write(video_data)
     #convert the mp4 file into a mp3 file
-    clip = mp.VideoFileClip(file_name)
-    clip.audio.write_audiofile(r"{}/{}_{}.mp3".format(name,data_time,video_id[-3:]))
+    with mp.VideoFileClip(file_name) as clip:
+        clip.audio.write_audiofile(r"Audio/{}_vid_{}.wav".format(name,video_id))
     os.remove(file_name)
     return
     
@@ -52,6 +53,6 @@ if type(v) != str:
 
 df,video_id,name=extract_INF_video(filename)
 
-for i in range(lan(video_id)):
-    download_video(api,video_id[i],name[i],df["Date"][i])
-    
+for i in range(len(video_id)):
+    print("checkpoint_{}".format(i))
+    download_video(v,video_id[i],name[i])
