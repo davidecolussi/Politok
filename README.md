@@ -1,5 +1,8 @@
 # Politok
 
+Tiktok scraping using unofficial APIs.
+Read the "Report.pdf" for a complete guide
+
 To setup the environment:
 
 - install WSL with Ubuntu for Windows 10 and run following commands (if you want, you may create a virtual environment):
